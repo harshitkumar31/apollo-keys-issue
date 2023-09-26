@@ -168,4 +168,4 @@ QueryPlan {
 
 Issue with the Query Plan : 
 
-Call to subgraph A is not made with the key field "k2" and "field1" within type "E1" is never resolved.
+Call to subgraph B is not made with the key field `_prefetch_` for entity "C1"
