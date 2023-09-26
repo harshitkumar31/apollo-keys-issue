@@ -7,31 +7,45 @@ npm run start
 
 Execute the following Query:
 ```graphql
-query ExampleQuery {
-  getE2 {
-    ...implFragment
-    
+query tp {
+  tpquery {
+    tp {
+      ...tpFields
+    }
   }
+}
 
+fragment tpFields on TP {
+  pg {
+    ...pgFields
+  }
 }
-fragment implFragment on O1 {
-impl1 {
-      
-      ... on Impl2 {
-        field2
-      }
-      ... on Impl1 {
-        field2
-        implField1
-        e1 {
-          id
-          __typename
-needsBoolean
-        }
-      
-    }
-    }
+
+fragment pgFields on TPPG {
+  fieldA {
+    ...CCAFragment
+    ...DSAFragment
+  }
 }
+
+fragment CCAFragment on CCA {
+  canDeselect
+  c1 {
+    __typename
+    id
+    isDefault
+  }
+}
+
+fragment DSAFragment on DSA {
+  canDeselect
+  c1 {
+    __typename
+    id
+    isDefault
+  }
+}
+
 ```
 
 Notice the difference in Query Plans
@@ -40,40 +54,53 @@ Old Gateway (`@apollo/gateway`: `0.28.3`)
 ```
 QueryPlan {
   Sequence {
-    Fetch(service: "subgraphB") {
+    Fetch(service: "subgraphA") {
       {
-        getE2 {
-          impl1 {
-            __typename
-            ... on Impl2 {
-              field2
-            }
-            ... on Impl1 {
-              field2
-              implField1
-              e1 {
-                id
+        tpquery {
+          tp {
+            pg {
+              fieldA {
                 __typename
-                needsBoolean
-                k2
+                ... on CCA {
+                  canDeselect
+                  c1 {
+                    __typename
+                    id
+                    _prefetch_
+                  }
+                }
+                ... on DSA {
+                  canDeselect
+                  c1 {
+                    __typename
+                    id
+                  }
+                }
               }
             }
           }
         }
       }
     },
-    Flatten(path: "getE2.impl1.e1") {
-      Fetch(service: "subgraphA") {
+    Flatten(path: "tpquery.tp.pg.@.fieldA.@.c1") {
+      Fetch(service: "subgraphB") {
         {
-          ... on E1 {
+          ... on C1 {
             __typename
             id
-            k2
+            _prefetch_
+          }
+          ... on C2 {
+            __typename
+            id
           }
         } =>
         {
-          ... on E1 {
-            field1
+          ... on C1 {
+            isDefault
+          }
+          ... on C2 {
+            isDefault
           }
         }
       },
@@ -85,26 +112,56 @@ QueryPlan {
 New Gateway (`@apollo/gateway`: `2.5.4`)
 ```
 QueryPlan {
-  Fetch(service: "subgraphB") {
-    {
-      getE2 {
-        impl1 {
-          __typename
-          ... on Impl2 {
-            field2
-          }
-          ... on Impl1 {
-            field2
-            implField1
-            e1 {
-              __typename
-              id
-              needsBoolean
+  Sequence {
+    Fetch(service: "subgraphA") {
+      {
+        tpquery {
+          tp {
+            pg {
+              fieldA {
+                __typename
+                ... on CCA {
+                  canDeselect
+                  c1 {
+                    __typename
+                    id
+                  }
+                }
+                ... on DSA {
+                  canDeselect
+                  c1 {
+                    __typename
+                    id
+                  }
+                }
+              }
             }
           }
         }
       }
-    }
+    },
+    Flatten(path: "tpquery.tp.pg.@.fieldA.@.c1") {
+      Fetch(service: "subgraphB") {
+        {
+          ... on C1 {
+            __typename
+            id
+          }
+          ... on C2 {
+            __typename
+            id
+          }
+        } =>
+        {
+          ... on C1 {
+            isDefault
+          }
+          ... on C2 {
+            isDefault
+          }
+        }
+      },
+    },
   },
 }
 ```

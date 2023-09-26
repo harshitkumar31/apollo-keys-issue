@@ -10,40 +10,33 @@ const gql = require('graphql-tag');
 const typeDefs = gql`
 scalar JSON
 
-extend type E1 @key(fields: "id k2") {
-    id: ID! @external
-    k2: JSON @external
-    needsBoolean: Boolean! @external
-  }
 
-  interface Interface1 {
-   
-    field2: String!
-  
-  }
-
-  type Impl1 implements Interface1 {
-    field2: String!
-    implField1: String
-    e1: E1! @provides(fields: "needsBoolean")
-  }
-
-  type Impl2 implements Interface1 {
-    field2: String!
-    implField2: String
-    e1: E1!
-  }
-
-  union  Union1 = Impl1 | Impl2
 
   type O1 {
     field1: String
-    impl1: Union1
   }
   
   type Query {
     getE2: O1
   }
+
+  interface EBase {
+    id: ID!
+    field1: String
+}
+
+type C2 implements EBase @key(fields: "id"){
+  id: ID!
+  field1: String
+  isDefault: Boolean
+}
+
+type C1 implements EBase @key(fields: "id _prefetch_") @key(fields: "id"){
+  id: ID!
+  _prefetch_: JSON
+  field1: String
+  isDefault: Boolean
+}
   
 `;
 

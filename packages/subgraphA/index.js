@@ -11,18 +11,48 @@ const typeDefs = gql`
 scalar JSON
 
 type Query {
-  getE1: E1
+  getE1: C1
+  tpquery: TPResponse
 }
 
-interface EBase {
-    id: ID!
-    field1: String
+type TPResponse {
+  tp: TP
 }
 
-type E1 implements EBase @key(fields: "id k2") {
-id: ID!
-  k2: JSON
-  field1: String
+type TP {
+  pg: [TPPG!]!
+}
+
+type TPPG {
+  fieldA: [TPA!]!
+}
+
+interface CA {
+  canDeselect: Boolean!
+}
+
+union TPA = CCA | DSA
+
+
+
+type CCA implements CA {
+  canDeselect: Boolean!
+  c1: C1
+}
+
+type DSA implements CA {
+  canDeselect: Boolean!
+  c1: C2
+}
+
+extend type C2 @key(fields: "id"){
+  id: ID! @external
+  needsBoolean: Boolean!
+}
+
+extend type C1 @key(fields: "id _prefetch_"){
+  id: ID! @external
+  _prefetch_: JSON @external
   needsBoolean: Boolean!
 }
 `;
