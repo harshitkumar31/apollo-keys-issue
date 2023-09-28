@@ -7,8 +7,7 @@ const gateway = new ApolloGateway({
   supergraphSdl: new IntrospectAndCompose({
     subgraphs: [
         { name: "subgraphA", url: "http://localhost:4001/graphql" },
-        { name: "subgraphB", url: "http://localhost:4002/graphql" },
-       // List of federation-capable GraphQL endpoints...
+        { name: "subgraphB", url: "http://localhost:4002/graphql" }
     ],
   }),
   experimental_didResolveQueryPlan: function(options) {
@@ -21,12 +20,12 @@ const gateway = new ApolloGateway({
 const server = new ApolloServer({ gateway });
 
 const init = async() => {
-const { url } = await startStandaloneServer(server, {
-    listen: {
-        port: 5000
-    }
-});
-console.log(`🚀  Server ready at ${url}`);
+    const { url } = await startStandaloneServer(server, {
+        listen: {
+            port: 4050
+        }
+    });
+    console.log(`🚀  Server ready at ${url}`);
 }
 
 init();

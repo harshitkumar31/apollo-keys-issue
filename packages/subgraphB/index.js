@@ -8,53 +8,21 @@ const gql = require('graphql-tag');
 // that together define the "shape" of queries that are executed against
 // your data.
 const typeDefs = gql`
-scalar JSON
 
-
-
-  type O1 {
-    field1: String
-  }
-  
-  type Query {
-    getE2: O1
-  }
-
-  interface EBase {
+  type Foo @key(fields: "id id2") @key(fields: "id") {
     id: ID!
-    field1: String
-}
+    id2: ID!
+    helloFromB: String
+  }
 
-type C2 implements EBase @key(fields: "id"){
-  id: ID!
-  field1: String
-  isDefault: Boolean
-}
-
-type C1 implements EBase @key(fields: "id _prefetch_") @key(fields: "id"){
-  id: ID!
-  _prefetch_: JSON
-  field1: String
-  isDefault: Boolean
-}
-  
 `;
 
-const resolvers = {
-    Query: {
-        getE2: () => ({
-          __typename: 'E1',
-          k2: {
-            "title": "For testing"
-          }
-        }),
-    },
-  };
+const resolvers = {};
 
 const server = new ApolloServer({
     schema: buildFederatedSchema({ typeDefs, resolvers }),
   });
-  
+
   const init = async () => {
   // Passing an ApolloServer instance to the `startStandaloneServer` function:
   //  1. creates an Express app
@@ -63,7 +31,7 @@ const server = new ApolloServer({
   const { url } = await startStandaloneServer(server, {
     listen: { port: 4002 },
   });
-  
+
   console.log(`🚀  Server ready at: ${url}`);
 };
 
